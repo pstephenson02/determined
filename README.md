@@ -140,4 +140,3 @@ with the latest news about Determined, please join the Determined community!
 # License
 
 [Apache V2](LICENSE)
-
