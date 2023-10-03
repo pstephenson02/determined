@@ -869,7 +869,7 @@ func (m *Master) Run(ctx context.Context) error {
 	}
 	defer closeWithErrCheck("db", m.db)
 
-	m.ClusterID, err = m.db.GetOrCreateClusterID()
+	m.ClusterID, err = m.db.GetOrCreateClusterID(m.config.Telemetry.ClusterID)
 	if err != nil {
 		return errors.Wrap(err, "could not fetch cluster id from database")
 	}
@@ -1205,13 +1205,8 @@ func (m *Master) Run(ctx context.Context) error {
 
 	user.RegisterAPIHandler(m.echo, userService)
 
-	telemetry.Init(
-		m.system,
-		m.db,
-		m.rm,
-		m.ClusterID,
-		m.config.Telemetry,
-	)
+	telemetry.Init(m.ClusterID, m.config.Telemetry)
+	go telemetry.PeriodicallyReportMasterTick(m.db, m.rm, m.system)
 
 	if err := sso.RegisterAPIHandlers(m.config, m.db, m.echo); err != nil {
 		return err
